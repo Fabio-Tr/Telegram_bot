@@ -14,8 +14,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     text = update.message.text
-    msg = f"Messaggio da @{user.username or user.first_name} (ID: {user.id}):
-{text}"
+    msg = f"Messaggio da @{user.username or user.first_name} (ID: {user.id}):{text}"
 
     # Salva il riferimento al messaggio
     user_message_map[update.message.message_id] = user.id
