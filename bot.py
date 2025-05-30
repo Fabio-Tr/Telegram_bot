@@ -32,8 +32,7 @@ async def handle_admin_response(update: Update, context: ContextTypes.DEFAULT_TY
 
         if user_line:
             user_id = int(user_line.split("ID:")[1].strip().replace(")", ""))
-            await context.bot.send_message(chat_id=user_id, text=f"Risposta:
-{update.message.text}")
+            await context.bot.send_message(chat_id=user_id, text=f"Risposta:{update.message.text}")
             await update.message.reply_text("Risposta inviata all'utente.")
         else:
             await update.message.reply_text("Impossibile trovare l'ID utente.")
