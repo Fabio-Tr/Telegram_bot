@@ -1,6 +1,8 @@
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
+import os
 
+BOT_TOKEN = os.getenv("BOT_TOKEN")
 # Inserisci qui il token del tuo bot e il tuo Telegram user ID
 BOT_TOKEN = '7697456185:AAHwcqUbva8jcFNkwK_58uUvHvBzxrSkSwM'
 ADMIN_ID = 150361594  # Il tuo ID Telegram (ti spiego sotto come trovarlo)
