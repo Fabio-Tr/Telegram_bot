@@ -1,48 +1,61 @@
+import os
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
-import os
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-# Inserisci qui il token del tuo bot e il tuo Telegram user ID
-BOT_TOKEN = '7697456185:AAHwcqUbva8jcFNkwK_58uUvHvBzxrSkSwM'
-ADMIN_ID = 150361594  # Il tuo ID Telegram (ti spiego sotto come trovarlo)
+ADMIN_ID = int(os.getenv("ADMIN_ID", "0"))  # Inserisci il tuo ID Telegram come variabile d'ambiente
 
-# Dizionario per salvare i messaggi degli utenti
-user_messages = {}
+# Memorizza gli ID degli utenti per le risposte
+user_message_map = {}
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Ciao! Scrivi pure, il mio creatore ti risponderà qui.")
+    await update.message.reply_text("Ciao! Scrivi pure, ti risponderò qui 😊")
 
-async def forward_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.message.from_user.id
+async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
     text = update.message.text
-    user_messages[ADMIN_ID] = user_messages.get(ADMIN_ID, {})
-    user_messages[ADMIN_ID][update.message.message_id] = user_id
-    
+    msg = f"Messaggio da @{user.username or user.first_name} (ID: {user.id}):
+{text}"
+
+    # Salva il riferimento al messaggio
+    user_message_map[update.message.message_id] = user.id
+
     # Inoltra all'admin
-    await context.bot.send_message(chat_id=ADMIN_ID, text=f"Nuovo messaggio da @{update.message.from_user.username}:\n\n{text}")
+    await context.bot.send_message(chat_id=ADMIN_ID, text=msg)
 
-async def reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("Messaggio ricevuto! Ti risponderò appena possibile.")
+
+async def handle_admin_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.reply_to_message:
-        text = update.message.text
-        target_user_id = None
+        original_text = update.message.reply_to_message.text
+        lines = original_text.splitlines()
+        user_line = next((line for line in lines if "ID:" in line), None)
 
-        # Cerca l'ID dell'utente originale
-        for mid, uid in user_messages.get(ADMIN_ID, {}).items():
-            if update.message.reply_to_message.text.startswith("Nuovo messaggio") and str(mid) in update.message.reply_to_message.text:
-                target_user_id = uid
-                break
-        
-        if target_user_id:
-            await context.bot.send_message(chat_id=target_user_id, text=f"Risposta dell'amministratore:\n\n{text}")
+        if user_line:
+            user_id = int(user_line.split("ID:")[1].strip().replace(")", ""))
+            await context.bot.send_message(chat_id=user_id, text=f"Risposta:
+{update.message.text}")
+            await update.message.reply_text("Risposta inviata all'utente.")
         else:
-            await update.message.reply_text("Impossibile trovare l'utente originale.")
+            await update.message.reply_text("Impossibile trovare l'ID utente.")
     else:
-        await update.message.reply_text("Rispondi a un messaggio per rispondere all'utente.")
+        await update.message.reply_text("Per rispondere a un utente, usa la funzione 'rispondi' a un suo messaggio.")
 
-app = ApplicationBuilder().token(BOT_TOKEN).build()
+def main():
+    app = ApplicationBuilder().token(BOT_TOKEN).build()
+    app.add_handler(CommandHandler("start", start))
 
-app.add_handler(CommandHandler("start", start))
-app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), forward_message if lambda u: u.effective_user.id != ADMIN_ID else reply))
+    app.add_handler(MessageHandler(
+        filters.TEXT & ~filters.COMMAND & filters.User(user_id=ADMIN_ID),
+        handle_admin_response
+    ))
 
-app.run_polling()
+    app.add_handler(MessageHandler(
+        filters.TEXT & ~filters.COMMAND & ~filters.User(user_id=ADMIN_ID),
+        handle_user_message
+    ))
+
+    app.run_polling()
+
+if __name__ == "__main__":
+    main()

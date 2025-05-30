@@ -1,16 +1,16 @@
-# Telegram Bot con Python
+# Telegram Bot con Risposte Admin
 
-Un semplice bot Telegram con supporto multi-utente, pronto per essere ospitato su Render.com
+Un bot Telegram multiutente dove l'amministratore può ricevere e rispondere ai messaggi.
 
 ## ✅ Funzionalità
-- Risponde ai messaggi di ogni utente
-- Multiutente supportato
-- Può essere facilmente esteso
+- Gli utenti scrivono → il messaggio viene inoltrato all’admin
+- L’admin risponde → la risposta viene inviata all’utente
+- Supporta più utenti contemporaneamente
 
 ## 🚀 Avvio locale
 
 1. Clona la repo
-2. Crea un file `.env` e copia il contenuto da `.env.example`
+2. Crea un file `.env` copiando `.env.example`
 3. Installa le dipendenze:
    ```bash
    pip install -r requirements.txt
@@ -22,10 +22,12 @@ Un semplice bot Telegram con supporto multi-utente, pronto per essere ospitato s
 
 ## ☁️ Deploy su Render
 
-1. Crea un nuovo Web Service su [https://render.com](https://render.com)
-2. Collega la tua repo GitHub
+1. Crea un Web Service su [https://render.com](https://render.com)
+2. Collega la repo GitHub
 3. Imposta:
    - **Start command**: `python bot.py`
-   - **Environment**: aggiungi `BOT_TOKEN`
+   - **Environment**: aggiungi `BOT_TOKEN` e `ADMIN_ID`
 
-Fatto! 🎉
+## 🔐 Dove trovare il tuo ADMIN_ID
+
+Scrivi a questo bot: [@userinfobot](https://t.me/userinfobot) e otterrai il tuo ID.
